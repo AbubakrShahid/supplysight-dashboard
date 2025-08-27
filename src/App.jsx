@@ -1,27 +1,10 @@
-import { useQuery } from '@apollo/client'
-import { GET_PRODUCTS, GET_WAREHOUSES } from './lib/apollo'
+import { useState } from 'react'
 
 function App() {
-  const { data: productsData, loading: productsLoading, error: productsError } = useQuery(GET_PRODUCTS);
-  const { data: warehousesData, loading: warehousesLoading, error: warehousesError } = useQuery(GET_WAREHOUSES);
-
-  if (productsLoading || warehousesLoading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-lg">Loading SupplySight Dashboard...</div>
-    </div>
-  );
-
-  if (productsError || warehousesError) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-lg text-red-600">
-        Error: {productsError?.message || warehousesError?.message}
-      </div>
-    </div>
-  );
+  const [selectedRange, setSelectedRange] = useState('7d')
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top Bar */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -29,46 +12,84 @@ function App() {
               <h1 className="text-2xl font-bold text-gray-900">SupplySight</h1>
             </div>
             <div className="flex space-x-2">
-              <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md">7d</button>
-              <button className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md">14d</button>
-              <button className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md">30d</button>
+              {['7d', '14d', '30d'].map(range => (
+                <button
+                  key={range}
+                  onClick={() => setSelectedRange(range)}
+                  className={`px-3 py-1 text-sm rounded-md ${
+                    selectedRange === range
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  {range}
+                </button>
+              ))}
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Test Data Display */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Products ({productsData?.products?.length || 0})</h2>
-            <div className="space-y-2">
-              {productsData?.products?.slice(0, 3).map(product => (
-                <div key={product.id} className="text-sm">
-                  <span className="font-medium">{product.name}</span> - 
-                  <span className="text-gray-600"> Stock: {product.stock}, Demand: {product.demand}</span>
-                </div>
-              ))}
-            </div>
+            <h3 className="text-sm font-medium text-gray-500">Total Stock</h3>
+            <p className="text-2xl font-bold text-gray-900">334</p>
           </div>
-
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Warehouses ({warehousesData?.warehouses?.length || 0})</h2>
-            <div className="space-y-2">
-              {warehousesData?.warehouses?.map(warehouse => (
-                <div key={warehouse.code} className="text-sm">
-                  <span className="font-medium">{warehouse.name}</span> - 
-                  <span className="text-gray-600"> {warehouse.city}, {warehouse.country}</span>
+            <h3 className="text-sm font-medium text-gray-500">Total Demand</h3>
+            <p className="text-2xl font-bold text-gray-900">400</p>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="text-sm font-medium text-gray-500">Fill Rate</h3>
+            <p className="text-2xl font-bold text-gray-900">83.5%</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">Products</h2>
+          </div>
+          <div className="p-6">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <h4 className="font-medium">12mm Hex Bolt</h4>
+                  <p className="text-sm text-gray-500">SKU: HEX-12-100 • BLR-A</p>
                 </div>
-              ))}
+                <div className="text-right">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm">Stock: 180</span>
+                    <span className="text-sm">Demand: 120</span>
+                    <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                      Healthy
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center p-4 bg-red-50 rounded-lg">
+                <div>
+                  <h4 className="font-medium">Steel Washer</h4>
+                  <p className="text-sm text-gray-500">SKU: WSR-08-500 • BLR-A</p>
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm">Stock: 50</span>
+                    <span className="text-sm">Demand: 80</span>
+                    <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
+                      Critical
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 text-center text-gray-600">
-          <p>✅ Module 1 Complete: Project Setup with React + Tailwind + GraphQL</p>
-          <p className="text-sm mt-2">Ready to implement the dashboard modules!</p>
+        <div className="mt-8 text-center text-gray-500">
+          <p>✅ Module 1 Complete: React + Tailwind + GraphQL Setup</p>
+          <p className="text-sm">Selected Range: {selectedRange}</p>
         </div>
       </main>
     </div>
