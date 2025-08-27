@@ -1,7 +1,42 @@
 import { useState } from 'react'
+import { useKPIs } from './hooks/useKPIs'
+import KPICard from './components/KPICard'
+import ProductCard from './components/ProductCard'
 
 function App() {
   const [selectedRange, setSelectedRange] = useState('7d')
+  const { kpis, products, loading, error } = useKPIs(selectedRange)
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-600 mt-4">Loading SupplySight Dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-2">⚠️ Connection Error</div>
+          <p className="text-gray-600">
+            Unable to connect to GraphQL server: {error.message}
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Make sure the server is running on port 4000
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const handleProductClick = (product) => {
+    console.log('Product clicked:', product)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -16,7 +51,7 @@ function App() {
                 <button
                   key={range}
                   onClick={() => setSelectedRange(range)}
-                  className={`px-3 py-1 text-sm rounded-md ${
+                  className={`px-3 py-1 text-sm rounded-md transition-colors ${
                     selectedRange === range
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -31,65 +66,61 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-sm font-medium text-gray-500">Total Stock</h3>
-            <p className="text-2xl font-bold text-gray-900">334</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-sm font-medium text-gray-500">Total Demand</h3>
-            <p className="text-2xl font-bold text-gray-900">400</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-sm font-medium text-gray-500">Fill Rate</h3>
-            <p className="text-2xl font-bold text-gray-900">83.5%</p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <KPICard
+            title="Total Stock"
+            value={kpis.totalStock.toLocaleString()}
+            subtitle="Units in inventory"
+          />
+          <KPICard
+            title="Total Demand"
+            value={kpis.totalDemand.toLocaleString()}
+            subtitle="Units requested"
+          />
+          <KPICard
+            title="Fill Rate"
+            value={`${kpis.fillRate.toFixed(1)}%`}
+            subtitle="Demand fulfillment"
+            className={kpis.fillRate < 80 ? 'border-l-4 border-red-500' : 'border-l-4 border-green-500'}
+          />
+          <KPICard
+            title="Product Status"
+            value={`${kpis.criticalProducts}/${products.length}`}
+            subtitle="Critical products"
+            className={kpis.criticalProducts > 0 ? 'border-l-4 border-red-500' : 'border-l-4 border-green-500'}
+          />
         </div>
 
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Products</h2>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <h4 className="font-medium">12mm Hex Bolt</h4>
-                  <p className="text-sm text-gray-500">SKU: HEX-12-100 • BLR-A</p>
-                </div>
-                <div className="text-right">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm">Stock: 180</span>
-                    <span className="text-sm">Demand: 120</span>
-                    <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                      Healthy
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center p-4 bg-red-50 rounded-lg">
-                <div>
-                  <h4 className="font-medium">Steel Washer</h4>
-                  <p className="text-sm text-gray-500">SKU: WSR-08-500 • BLR-A</p>
-                </div>
-                <div className="text-right">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm">Stock: 50</span>
-                    <span className="text-sm">Demand: 80</span>
-                    <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
-                      Critical
-                    </span>
-                  </div>
-                </div>
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Products ({products.length})
+              </h2>
+              <div className="flex space-x-4 text-sm">
+                <span className="text-green-600">
+                  ● {kpis.healthyProducts} Healthy
+                </span>
+                <span className="text-yellow-600">
+                  ● {kpis.lowProducts} Low
+                </span>
+                <span className="text-red-600">
+                  ● {kpis.criticalProducts} Critical
+                </span>
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="mt-8 text-center text-gray-500">
-          <p>✅ Module 1 Complete: React + Tailwind + GraphQL Setup</p>
-          <p className="text-sm">Selected Range: {selectedRange}</p>
+          <div className="p-6">
+            <div className="space-y-4">
+              {products.map(product => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onClick={handleProductClick}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </main>
     </div>
