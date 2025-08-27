@@ -1,16 +1,17 @@
-import { useState } from 'react'
-import { useKPIs } from '../hooks/useKPIs'
-import KPICard from './KPICard'
-import ProductCard from './ProductCard'
-import KPIChart from './KPIChart'
-import StatsGrid from './StatsGrid'
-import WarehouseOverview from './WarehouseOverview'
-import ProductModal from './ProductModal'
+import { useState } from "react";
+import { useKPIs } from "../hooks/useKPIs";
+import KPICard from "./KPICard";
+import ProductCard from "./ProductCard";
+import KPIChart from "./KPIChart";
+import StatsGrid from "./StatsGrid";
+import WarehouseOverview from "./WarehouseOverview";
+import ProductDrawer from "./ProductDrawer";
 
 const Dashboard = ({ selectedRange }) => {
-  const { kpis, products, warehouses, chartData, loading, error } = useKPIs(selectedRange)
-  const [selectedProduct, setSelectedProduct] = useState(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const { kpis, products, warehouses, chartData, loading, error } =
+    useKPIs(selectedRange);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (loading) {
     return (
@@ -20,31 +21,35 @@ const Dashboard = ({ selectedRange }) => {
           <p className="text-gray-600 mt-4">Loading dashboard data...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-        <div className="text-red-600 text-lg font-medium mb-2">Connection Error</div>
-        <p className="text-red-700">Unable to load dashboard data: {error.message}</p>
+        <div className="text-red-600 text-lg font-medium mb-2">
+          Connection Error
+        </div>
+        <p className="text-red-700">
+          Unable to load dashboard data: {error.message}
+        </p>
       </div>
-    )
+    );
   }
 
   const handleProductClick = (product) => {
-    setSelectedProduct(product)
-    setIsModalOpen(true)
-  }
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
 
   const handleModalClose = () => {
-    setIsModalOpen(false)
-    setSelectedProduct(null)
-  }
+    setIsModalOpen(false);
+    setSelectedProduct(null);
+  };
 
   const handleProductSave = (updatedProduct) => {
-    console.log('Product updated:', updatedProduct)
-  }
+    console.log("Product updated:", updatedProduct);
+  };
 
   return (
     <div className="space-y-6">
@@ -63,32 +68,28 @@ const Dashboard = ({ selectedRange }) => {
           title="Fill Rate"
           value={`${kpis.fillRate.toFixed(1)}%`}
           subtitle="Demand fulfillment"
-          className={kpis.fillRate < 80 ? 'border-l-4 border-red-500' : 'border-l-4 border-green-500'}
+          className={
+            kpis.fillRate < 80
+              ? "border-l-4 border-red-500"
+              : "border-l-4 border-green-500"
+          }
         />
         <KPICard
           title="Product Status"
           value={`${kpis.criticalProducts}/${products.length}`}
           subtitle="Critical products"
-          className={kpis.criticalProducts > 0 ? 'border-l-4 border-red-500' : 'border-l-4 border-green-500'}
+          className={
+            kpis.criticalProducts > 0
+              ? "border-l-4 border-red-500"
+              : "border-l-4 border-green-500"
+          }
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <KPIChart
-          title="Stock vs Demand Trend"
-          data={chartData}
-          type="area"
-        />
-        <KPIChart
-          title="Stock Level Trend"
-          data={chartData}
-          type="line"
-        />
-        <KPIChart
-          title="Demand Forecast"
-          data={chartData}
-          type="line"
-        />
+        <KPIChart title="Stock vs Demand Trend" data={chartData} type="area" />
+        <KPIChart title="Stock Level Trend" data={chartData} type="line" />
+        <KPIChart title="Demand Forecast" data={chartData} type="line" />
       </div>
 
       <StatsGrid kpis={kpis} products={products} />
@@ -103,15 +104,21 @@ const Dashboard = ({ selectedRange }) => {
                 Recent Products ({products.length})
               </h3>
               <div className="flex space-x-4 text-sm">
-                <span className="text-green-600">● {kpis.healthyProducts} Healthy</span>
-                <span className="text-yellow-600">● {kpis.lowProducts} Low</span>
-                <span className="text-red-600">● {kpis.criticalProducts} Critical</span>
+                <span className="text-green-600">
+                  ● {kpis.healthyProducts} Healthy
+                </span>
+                <span className="text-yellow-600">
+                  ● {kpis.lowProducts} Low
+                </span>
+                <span className="text-red-600">
+                  ● {kpis.criticalProducts} Critical
+                </span>
               </div>
             </div>
           </div>
           <div className="p-6">
             <div className="space-y-4 max-h-80 overflow-y-auto">
-              {products.slice(0, 5).map(product => (
+              {products.slice(0, 5).map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -123,14 +130,14 @@ const Dashboard = ({ selectedRange }) => {
         </div>
       </div>
 
-      <ProductModal
+      <ProductDrawer
         product={selectedProduct}
         isOpen={isModalOpen}
         onClose={handleModalClose}
         onSave={handleProductSave}
       />
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;

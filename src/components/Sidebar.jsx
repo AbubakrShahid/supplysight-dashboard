@@ -5,10 +5,7 @@ const Sidebar = ({ currentPage, onPageChange }) => {
 
   const menuItems = [
     { id: 'dashboard', name: 'Dashboard', icon: '📊' },
-    { id: 'products', name: 'Products', icon: '📦' },
-    { id: 'warehouses', name: 'Warehouses', icon: '🏢' },
-    { id: 'analytics', name: 'Analytics', icon: '📈' },
-    { id: 'settings', name: 'Settings', icon: '⚙️' }
+    { id: 'products', name: 'Products', icon: '📦' }
   ]
 
   return (
@@ -24,7 +21,7 @@ const Sidebar = ({ currentPage, onPageChange }) => {
         <div className="flex items-center justify-center h-16 border-b border-gray-200">
           <h1 className="text-xl font-bold text-gray-900">SupplySight</h1>
         </div>
-        
+
         <nav className="mt-8">
           {menuItems.map(item => (
             <button

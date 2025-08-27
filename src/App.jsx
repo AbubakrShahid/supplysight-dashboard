@@ -3,7 +3,6 @@ import Sidebar from './components/Sidebar'
 import TopBar from './components/TopBar'
 import Dashboard from './components/Dashboard'
 import ProductsPage from './components/ProductsPage'
-import PlaceholderPage from './components/PlaceholderPage'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('dashboard')
@@ -17,12 +16,6 @@ function App() {
         return <Dashboard selectedRange={selectedRange} />
       case 'products':
         return <ProductsPage />
-      case 'warehouses':
-        return <PlaceholderPage title="Warehouses" description="Warehouse management coming soon" />
-      case 'analytics':
-        return <PlaceholderPage title="Analytics" description="Advanced analytics coming soon" />
-      case 'settings':
-        return <PlaceholderPage title="Settings" description="Settings panel coming soon" />
       default:
         return <Dashboard selectedRange={selectedRange} />
     }
