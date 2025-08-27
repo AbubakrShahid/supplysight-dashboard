@@ -1,9 +1,12 @@
 import { useKPIs } from '../hooks/useKPIs'
 import KPICard from './KPICard'
 import ProductCard from './ProductCard'
+import KPIChart from './KPIChart'
+import StatsGrid from './StatsGrid'
+import WarehouseOverview from './WarehouseOverview'
 
 const Dashboard = ({ selectedRange }) => {
-  const { kpis, products, loading, error } = useKPIs(selectedRange)
+  const { kpis, products, warehouses, chartData, loading, error } = useKPIs(selectedRange)
 
   if (loading) {
     return (
@@ -56,28 +59,52 @@ const Dashboard = ({ selectedRange }) => {
         />
       </div>
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Products ({products.length})
-            </h3>
-            <div className="flex space-x-4 text-sm">
-              <span className="text-green-600">● {kpis.healthyProducts} Healthy</span>
-              <span className="text-yellow-600">● {kpis.lowProducts} Low</span>
-              <span className="text-red-600">● {kpis.criticalProducts} Critical</span>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <KPIChart
+          title="Stock vs Demand Trend"
+          data={chartData}
+          type="area"
+        />
+        <KPIChart
+          title="Stock Level Trend"
+          data={chartData}
+          type="line"
+        />
+        <KPIChart
+          title="Demand Forecast"
+          data={chartData}
+          type="line"
+        />
+      </div>
+
+      <StatsGrid kpis={kpis} products={products} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <WarehouseOverview warehouses={warehouses} products={products} />
+
+        <div className="bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Recent Products ({products.length})
+              </h3>
+              <div className="flex space-x-4 text-sm">
+                <span className="text-green-600">● {kpis.healthyProducts} Healthy</span>
+                <span className="text-yellow-600">● {kpis.lowProducts} Low</span>
+                <span className="text-red-600">● {kpis.criticalProducts} Critical</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            {products.map(product => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onClick={handleProductClick}
-              />
-            ))}
+          <div className="p-6">
+            <div className="space-y-4 max-h-80 overflow-y-auto">
+              {products.slice(0, 5).map(product => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onClick={handleProductClick}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
