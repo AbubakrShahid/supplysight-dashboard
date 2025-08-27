@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "server": "node server/index.js",
+    "server": "cd server && npm install && node index.js",
     "start": "concurrently \"npm run server\" \"npm run dev\""
   },
   "dependencies": {
@@ -26,7 +26,7 @@
     "@eslint/js": "^9.33.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
-    "@vitejs/plugin-react": "^5.0.0",
+    "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.2.1",
     "eslint": "^9.33.0",
@@ -35,6 +35,6 @@
     "globals": "^16.3.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.12",
-    "vite": "^7.1.2"
+    "vite": "^4.5.3"
   }
 }

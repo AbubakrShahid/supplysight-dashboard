@@ -1,0 +1,12 @@
+{
+  "name": "supplysight-server",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "apollo-server-express": "^3.13.0",
+    "graphql": "^16.8.1",
+    "cors": "^2.8.5"
+  }
+}
