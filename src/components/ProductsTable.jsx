@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react'
 import ProductCard from './ProductCard'
 import SearchFilters from './SearchFilters'
+import Pagination from './Pagination'
+import BulkActions from './BulkActions'
 
 const ProductsTable = ({ products, warehouses, onProductClick }) => {
   const [filters, setFilters] = useState({
@@ -9,6 +11,9 @@ const ProductsTable = ({ products, warehouses, onProductClick }) => {
     warehouse: 'all'
   })
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(25)
+  const [selectedProducts, setSelectedProducts] = useState([])
 
   const filteredProducts = useMemo(() => {
     let filtered = [...products]
@@ -55,11 +60,55 @@ const ProductsTable = ({ products, warehouses, onProductClick }) => {
     return filtered
   }, [products, filters, sortConfig])
 
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    return filteredProducts.slice(startIndex, startIndex + itemsPerPage)
+  }, [filteredProducts, currentPage, itemsPerPage])
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
+
   const handleSort = (key) => {
     setSortConfig(prevConfig => ({
       key,
       direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
     }))
+  }
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+    setSelectedProducts([])
+  }
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage)
+    setCurrentPage(1)
+    setSelectedProducts([])
+  }
+
+  const handleSelectProduct = (product) => {
+    setSelectedProducts(prev => {
+      const isSelected = prev.some(p => p.id === product.id)
+      if (isSelected) {
+        return prev.filter(p => p.id !== product.id)
+      } else {
+        return [...prev, product]
+      }
+    })
+  }
+
+  const handleSelectAll = () => {
+    if (selectedProducts.length === paginatedProducts.length) {
+      setSelectedProducts([])
+    } else {
+      setSelectedProducts([...paginatedProducts])
+    }
+  }
+
+  const handleBulkAction = (action, products) => {
+    console.log(`Bulk action ${action} on`, products)
+    if (action === 'export') {
+      setSelectedProducts([])
+    }
   }
 
   const getSortIcon = (key) => {
@@ -75,12 +124,19 @@ const ProductsTable = ({ products, warehouses, onProductClick }) => {
   }
 
   const stats = getStatusStats()
+  const isAllSelected = paginatedProducts.length > 0 && selectedProducts.length === paginatedProducts.length
 
   return (
     <div className="space-y-6">
       <SearchFilters 
         onFiltersChange={setFilters}
         warehouses={warehouses}
+      />
+
+      <BulkActions
+        selectedProducts={selectedProducts}
+        onBulkAction={handleBulkAction}
+        onClearSelection={() => setSelectedProducts([])}
       />
 
       <div className="bg-white rounded-lg shadow">
@@ -101,6 +157,14 @@ const ProductsTable = ({ products, warehouses, onProductClick }) => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={handleSelectAll}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </th>
                 <th className="px-6 py-3 text-left">
                   <button
                     onClick={() => handleSort('name')}
@@ -141,36 +205,45 @@ const ProductsTable = ({ products, warehouses, onProductClick }) => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts.map(product => {
+              {paginatedProducts.map(product => {
                 const getStatus = () => {
                   if (product.stock > product.demand) return { label: 'Healthy', color: 'bg-green-100 text-green-800' }
                   if (product.stock === product.demand) return { label: 'Low', color: 'bg-yellow-100 text-yellow-800' }
                   return { label: 'Critical', color: 'bg-red-100 text-red-800' }
                 }
                 const status = getStatus()
+                const isSelected = selectedProducts.some(p => p.id === product.id)
 
                 return (
                   <tr 
                     key={product.id}
-                    className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => onProductClick?.(product)}
+                    className={`hover:bg-gray-50 cursor-pointer ${isSelected ? 'bg-blue-50' : ''}`}
                   >
                     <td className="px-6 py-4">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleSelectProduct(product)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </td>
+                    <td className="px-6 py-4" onClick={() => onProductClick?.(product)}>
                       <div>
                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
                         <div className="text-sm text-gray-500">SKU: {product.sku}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                    <td className="px-6 py-4 text-sm text-gray-900" onClick={() => onProductClick?.(product)}>
                       {product.warehouse}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 text-right font-medium">
+                    <td className="px-6 py-4 text-sm text-gray-900 text-right font-medium" onClick={() => onProductClick?.(product)}>
                       {product.stock.toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 text-right font-medium">
+                    <td className="px-6 py-4 text-sm text-gray-900 text-right font-medium" onClick={() => onProductClick?.(product)}>
                       {product.demand.toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-4 text-center" onClick={() => onProductClick?.(product)}>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${status.color}`}>
                         {status.label}
                       </span>
@@ -182,12 +255,23 @@ const ProductsTable = ({ products, warehouses, onProductClick }) => {
           </table>
         </div>
 
-        {filteredProducts.length === 0 && (
+        {paginatedProducts.length === 0 && (
           <div className="text-center py-12">
             <div className="text-gray-400 text-lg mb-2">📦</div>
             <p className="text-gray-500">No products match your current filters</p>
             <p className="text-sm text-gray-400 mt-1">Try adjusting your search criteria</p>
           </div>
+        )}
+
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredProducts.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
+            onItemsPerPageChange={handleItemsPerPageChange}
+          />
         )}
       </div>
     </div>
