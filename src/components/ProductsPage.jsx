@@ -1,8 +1,12 @@
+import { useState } from 'react'
 import { useKPIs } from '../hooks/useKPIs'
 import ProductsTable from './ProductsTable'
+import ProductModal from './ProductModal'
 
 const ProductsPage = () => {
   const { products, warehouses, loading, error } = useKPIs('7d')
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   if (loading) {
     return (
@@ -25,15 +29,34 @@ const ProductsPage = () => {
   }
 
   const handleProductClick = (product) => {
-    console.log('Product clicked:', product)
+    setSelectedProduct(product)
+    setIsModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+    setSelectedProduct(null)
+  }
+
+  const handleProductSave = (updatedProduct) => {
+    console.log('Product updated:', updatedProduct)
   }
 
   return (
-    <ProductsTable 
-      products={products}
-      warehouses={warehouses}
-      onProductClick={handleProductClick}
-    />
+    <>
+      <ProductsTable 
+        products={products}
+        warehouses={warehouses}
+        onProductClick={handleProductClick}
+      />
+      
+      <ProductModal
+        product={selectedProduct}
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onSave={handleProductSave}
+      />
+    </>
   )
 }
 

@@ -1,12 +1,16 @@
+import { useState } from 'react'
 import { useKPIs } from '../hooks/useKPIs'
 import KPICard from './KPICard'
 import ProductCard from './ProductCard'
 import KPIChart from './KPIChart'
 import StatsGrid from './StatsGrid'
 import WarehouseOverview from './WarehouseOverview'
+import ProductModal from './ProductModal'
 
 const Dashboard = ({ selectedRange }) => {
   const { kpis, products, warehouses, chartData, loading, error } = useKPIs(selectedRange)
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   if (loading) {
     return (
@@ -29,7 +33,17 @@ const Dashboard = ({ selectedRange }) => {
   }
 
   const handleProductClick = (product) => {
-    console.log('Product clicked:', product)
+    setSelectedProduct(product)
+    setIsModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+    setSelectedProduct(null)
+  }
+
+  const handleProductSave = (updatedProduct) => {
+    console.log('Product updated:', updatedProduct)
   }
 
   return (
@@ -108,6 +122,13 @@ const Dashboard = ({ selectedRange }) => {
           </div>
         </div>
       </div>
+
+      <ProductModal
+        product={selectedProduct}
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onSave={handleProductSave}
+      />
     </div>
   )
 }
