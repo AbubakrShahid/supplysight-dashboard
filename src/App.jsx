@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Sidebar from './components/Sidebar'
 import TopBar from './components/TopBar'
 import Dashboard from './components/Dashboard'
+import ProductsPage from './components/ProductsPage'
 import PlaceholderPage from './components/PlaceholderPage'
 
 function App() {
@@ -15,7 +16,7 @@ function App() {
       case 'dashboard':
         return <Dashboard selectedRange={selectedRange} />
       case 'products':
-        return <PlaceholderPage title="Products" description="Product management coming soon" />
+        return <ProductsPage />
       case 'warehouses':
         return <PlaceholderPage title="Warehouses" description="Warehouse management coming soon" />
       case 'analytics':
